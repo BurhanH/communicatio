@@ -17,6 +17,9 @@
     <ItemGroup>
       <PackageReference Include="Confluent.Kafka" Version="2.3.0" />
       <PackageReference Include="OpenTelemetry" Version="1.7.0" />
+      <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.7.0" />
+      <PackageReference Include="OpenTelemetry.Exporter.InfluxDB" Version="1.0.0-alpha.3" />
+      <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.7.0" />
     </ItemGroup>
 
 </Project>
