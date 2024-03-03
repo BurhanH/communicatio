@@ -49,5 +49,36 @@ services:
     depends_on:
       - redpanda
 
+  influxdb:
+    hostname: influxdb
+    image: influxdb:2.7.5
+    container_name: communicatio-influxdb
+    ports:
+      - "8086:8086"
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: admin
+      DOCKER_INFLUXDB_INIT_PASSWORD: communicatio
+      DOCKER_INFLUXDB_INIT_ORG: communicatio
+      DOCKER_INFLUXDB_INIT_BUCKET: communicatio-bucket
+      DOCKER_INFLUXDB_INIT_RETENTION: 1w
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: DOCKER_INFLUXDB_INIT_ADMIN_TOKEN
+    
+    depends_on:
+      - redpanda
+
+  grafana:
+    hostname: grafana
+    image: grafana/grafana:10.2.4
+    container_name: communicatio-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: communicatio
+    
+    depends_on:
+      - influxdb
+
 volumes:
   redpanda-data:
