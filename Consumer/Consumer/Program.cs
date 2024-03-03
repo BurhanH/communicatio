@@ -1,4 +1,9 @@
-﻿namespace Consumer;
+﻿using System.Diagnostics.Metrics;
+using OpenTelemetry;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+
+namespace Consumer;
 
 using Confluent.Kafka;
 
@@ -6,6 +11,20 @@ class Program
 {
     public static void Main(string[] args)
     {
+        Action<ResourceBuilder> configureResource = r => r.AddService(
+            serviceName: "Communicatio-Consumer",
+            serviceVersion: typeof(Program).Assembly.GetName().Version?.ToString() ?? "unknown",
+            serviceInstanceId: Environment.MachineName);
+        
+        var meterProvider = Sdk.CreateMeterProviderBuilder()
+            .ConfigureResource(configureResource)
+            .AddConsoleExporter()
+            .AddMeter("Consumer")
+            .Build();
+        
+        var meter = new Meter("Consumer");
+        var pCounter = meter.CreateCounter<int>("consumer.messages.received");
+        
         var conf = new ConsumerConfig
         {
             GroupId = "test-consumer-group",
@@ -36,6 +55,8 @@ class Program
                     {
                         var cr = c.Consume(cts.Token);
                         Console.WriteLine($"Consumed message '{cr.Value}' at: '{cr.TopicPartitionOffset}'.");
+                        
+                        pCounter.Add(1);
                     }
                     catch (ConsumeException e)
                     {
@@ -49,5 +70,7 @@ class Program
                 c.Close();
             }
         }
+        
+        meterProvider.ForceFlush();
     }
 }
